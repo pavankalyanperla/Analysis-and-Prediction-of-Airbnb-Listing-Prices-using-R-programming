@@ -115,12 +115,14 @@ The test set is created first and kept completely separate throughout model deve
 
 ### Model Comparison
 
-| Model | Validation RMSE | Notes |
-|-------|-----------------|-------|
-| Baseline Median | 181.97 | Naïve benchmark: predicts training median for every listing |
-| Linear Regression | 164.87 | All 7 predictors significant; interpretable coefficients |
-| Random Forest (ntree=500) | 153.04 | Captures non-linear interactions; 43.4% variance explained |
-| **Decision Tree** | **150.70** | Lowest validation RMSE; narrowly best on this split |
+| Model | Validation RMSE | Validation R² | Notes |
+|-------|-----------------|---------------|-------|
+| Baseline Median | 181.97 | — | Naïve benchmark: predicts training median for every listing |
+| Linear Regression | 164.87 | 0.159 | All 7 predictors significant; interpretable coefficients |
+| Random Forest (ntree=500) | 153.04 | 0.276 | Captures non-linear interactions |
+| **Decision Tree** | **150.70** | **0.298** | Lowest validation RMSE; narrowly best on this split |
+
+> **Note on R²:** The RF model printout shows "43.4% Var explained" — this is an OOB estimate computed on training-data held-out bags, not on the held-out validation set. The linear model's `summary()` R² = 0.3354 is a training-fit (in-sample) metric. The two are not on the same basis and should not be compared directly. The validation R² column above gives the correct apples-to-apples comparison for all models.
 
 **Final held-out test RMSE (Decision Tree): 70.28**
 
@@ -167,7 +169,7 @@ accommodates=2.88, latitude=1.00, longitude=1.03
 
 ## Production Recommendation
 
-For **price estimation accuracy**, use the **Random Forest**: it explains 43.4% of price variance vs 33.5% for linear regression and is robust to the outliers and non-linearities that violate linear model assumptions. A single decision tree (the best model on this split) is less stable — small training-set changes can produce very different trees.
+For **price estimation accuracy**, use the **Random Forest**: on the held-out validation set it achieves R² = 0.276 vs R² = 0.159 for linear regression, and it is robust to the outliers and non-linearities that violate linear model assumptions. A single decision tree (the best model on this split) is less stable — small training-set changes can produce very different trees.
 
 For **host-facing price explanation** ("why is my listing priced at X?"), use the **linear model**: its coefficients give direct, actionable guidance in dollars per unit change.
 
